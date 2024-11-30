@@ -1,4 +1,5 @@
-import { readSpoiler, makeToggle, loadJSON } from './utility.js';
+import { readSpoiler, loadJSON } from './utility.js';
+import { makeToggle } from './ui.js';
 
 // Handle scenario data loaded from JSON
 class Scenarios {

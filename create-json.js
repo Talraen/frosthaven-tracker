@@ -1,4 +1,5 @@
-import { popMessage, popError, popConfirm, capitalize, hideSpoiler, makeRadioButtons, copyText, readTabs } from './modules/utility.js';
+import { capitalize, hideSpoiler, copyText, readTabs } from './modules/utility.js';
+import { popError, makeRadioButtons } from './modules/ui.js';
 
 const $processTabInput = document.getElementById('process-tab-input');
 const $tabInput = document.getElementById('tab-input');
