@@ -1,0 +1,26 @@
+body {
+    font-family: sans-serif;
+}
+.textarea-utility {
+    width: 90vw;
+    height: 25vh;
+    margin: 1vh 0;
+}
+#json-output-area {
+    display: none;
+}
+#json-output-area.shown {
+    display: block;
+}
+.radio-button {
+    background-color: #bbb;
+    border-radius: 0.5em;
+    color: #000;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.2em 0.4em;
+}
+.radio-button.enabled {
+    background-color: #00c;
+    color: #ddd;
+}

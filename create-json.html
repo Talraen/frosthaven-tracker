@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>JSON Creator -Frosthaven Campaign Tracker</title>
+        <link rel="stylesheet" href="./styles.css">
+    </head>
+    <body>
+        <h1>Frosthaven Campaign Tracker JSON Creator</h1>
+
+        <div>
+            <a href="index.html">Back to Campaign Tracker</a>
+        </div>
+
+        <div id="tab-input-area">
+            <div class="select-list">
+                Data Type:
+                <div class="tab-input-type" data-value="scenarios">Scenarios</div>
+                <div class="tab-input-type" data-value="buildings">Buildings</div>
+                <div class="tab-input-type" data-value="alchemy">Alchemy Chart</div>
+            </div>
+            <div class="textarea-instructions">Paste tab data from Excel below:</div>
+            <textarea class="textarea-utility tab-input" id="tab-input"></textarea>
+            <button id="process-tab-input" disabled>Convert to JSON</button>
+        </div>
+
+        <div id="json-output-area">
+            <div class="textarea-instructions">Generated JSON</div>
+            <textarea class="textarea-utility json-output" id="json-output"></textarea>
+        </div>
+
+        <script type="module" src="create-json.js"></script>
+    </body>
+</html>
