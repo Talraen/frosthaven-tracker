@@ -7,6 +7,19 @@ ul {
     padding: 0;
 }
 /* Generic control buttons */
+.button {
+    background-color: #999;
+    color: #000;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: bold;
+    margin: 0.1em 0.2em;
+    border: 0.2em outset #888;
+    padding: 0.2em 0.4em;
+}
+.button:active {
+    border-style: inset;
+}
 .radio-button {
     background-color: #bbb;
     border-radius: 0.5em;

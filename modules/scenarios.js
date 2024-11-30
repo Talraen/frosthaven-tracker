@@ -1,11 +1,16 @@
 import { readSpoiler, loadJSON } from './utility.js';
-import { makeToggle } from './ui.js';
+import { popPrompt, makeButton, makeToggle, emptyElement, popError } from './ui.js';
 
 // Handle scenario data loaded from JSON
 class Scenarios {
     static loadPromise;
     static loadedData;
     static userData;
+
+    // Codes for unlockScenario
+    static UNLOCKED = 0;
+    static NOT_FOUND = 1;
+    static ALREADY_UNLOCKED = 2;
 
     // Load data from JSON (force reload if previously load is complete)
     static loadData = function() {
@@ -56,15 +61,44 @@ class Scenarios {
     static updateUserData = function() {
         window.localStorage.setItem('user-scenario-data', JSON.stringify(Scenarios.userData));
     }
+
+    // Unlocks a scenario, returning whether it succeeded and an error message if not
+    static unlockScenario(scenario) {
+        if (typeof scenario === 'number' || scenario.match(/^\d+$/)) {
+            const number = parseInt(scenario);
+            if (!Scenarios.loadedData[number] || !Scenarios.loadedData[number].number === number) {
+                return [Scenarios.NOT_FOUND, 'No scenario number ' + number + ' found'];
+            }
+            if (typeof Scenarios.userData[number] !== 'undefined') {
+                return [Scenarios.ALREADY_UNLOCKED, 'Scenario ' + number + ' already unlocked'];
+            }
+            Scenarios.userData[number] = { status: 'revealed' };
+            return [Scenarios.UNLOCKED, null];
+        } else {
+            for (const [number, scenarioData] of Object.entries(Scenarios.loadedData)) {
+                if (scenario === readSpoiler(scenarioData.name)) {
+                    if (typeof Scenarios.userData[number] !== 'undefined') {
+                        return [Scenarios.ALREADY_UNLOCKED, 'Scenario "' + scenario + '" already unlocked'];
+                    }
+                    Scenarios.userData[number] = { status: 'revealed' };
+                    return [Scenarios.UNLOCKED, null];
+                }
+            }
+            return [Scenarios.NOT_FOUND, 'Scenario "' + scenario + '" not found'];
+        }
+    }
 }
 
 // Full scenario list rewrite based on current data
 function updateScenarios() {
     const $scenarioList = document.getElementById('scenario-list');
+    emptyElement($scenarioList);
     Scenarios.getData().then(scenarios => {
         const userData = Scenarios.getUserData();
+        let lockedScenarios = 0;
         for (const [number, scenario] of Object.entries(scenarios)) {
             if (!userData[number]) {
+                lockedScenarios++;
                 continue;
             }
             const userScenario = userData[number];
@@ -121,6 +155,51 @@ function updateScenarios() {
                 });
                 $li.appendChild($randomItem);
             }
+
+            $scenarioList.appendChild($li);
+        }
+
+        if (lockedScenarios > 0) {
+            const $li = document.createElement('li');
+
+            const $unlockButton = document.createElement('div');
+            $unlockButton.appendChild(document.createTextNode('Unlock Scenarios'));
+            makeButton($unlockButton, function(event) {
+                event.preventDefault();
+                popPrompt('Enter one or more scenario numbers or names to unlock')
+                    .then(response => {
+                        const scenarios = response.split(/,/g).map(a => a.trim());
+                        let successes = 0;
+                        let errors = {};
+                        errors[Scenarios.NOT_FOUND] = [];
+                        errors[Scenarios.ALREADY_UNLOCKED] = [];
+
+                        scenarios.forEach(scenario => {
+                            const [code, message] = Scenarios.unlockScenario(scenario);
+                            if (code === Scenarios.UNLOCKED) {
+                                successes++;
+                            } else {
+                                errors[code].push(scenario);
+                            }
+                        });
+                        if (successes > 0) {
+                            Scenarios.updateUserData();
+                            updateScenarios();
+                        }
+                        const errorMessages = [];
+                        if (errors[Scenarios.NOT_FOUND].length > 0) {
+                            errorMessages.push('Not found: ' + errors[Scenarios.NOT_FOUND].join(', '));
+                        }
+                        if (errors[Scenarios.ALREADY_UNLOCKED].length > 0) {
+                            errorMessages.push('Already unlocked: ' + errors[Scenarios.ALREADY_UNLOCKED].join(', '));
+                        }
+                        if (errorMessages.length > 0) {
+                            popError("Errors unlocking scenarios:\n" + errorMessages.join("\n"));
+                        }
+                    })
+                    .catch(() => {});
+            });
+            $li.appendChild($unlockButton);
 
             $scenarioList.appendChild($li);
         }

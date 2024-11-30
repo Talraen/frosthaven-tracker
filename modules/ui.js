@@ -16,11 +16,27 @@ const popConfirm = message =>
         }
     });
 
+const popPrompt = message => {
+    return new Promise((resolve, reject) => {
+        const response = prompt(message);
+        if (response) {
+            resolve(response);
+        } else {
+            reject();
+        }
+    });
+}
+
 // Quickly clear out DOM element
 function emptyElement($element) {
     while ($element.firstChild) {
         $element.removeChild($element.firstChild);
     }
+}
+
+function makeButton($element, clickCallback) {
+    $element.classList.add('button');
+    $element.addEventListener('click', clickCallback);
 }
 
 function makeRadioButtons($buttons, clickCallback, { deselect = false } = {}) {
@@ -94,4 +110,4 @@ function assignToggleOption($element, option) {
     }
 }
 
-export { popMessage, popError, popConfirm, emptyElement, makeRadioButtons, makeToggle };
+export { popMessage, popError, popConfirm, popPrompt, emptyElement, makeButton, makeRadioButtons, makeToggle };
