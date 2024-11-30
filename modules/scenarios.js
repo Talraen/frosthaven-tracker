@@ -1,27 +1,36 @@
 import { readSpoiler, loadJSON } from './utility.js';
 
-let scenarioData = null;
-let loadInProgress = false;
-
-// TODO: This should be an object and handle load blocking and such internally (one promise, extra calls return the one in progress)
+// Handle scenario data loaded from JSON
 class Scenarios {
     static loadPromise;
+    static loadedData;
 
+    // Load data from JSON (force reload if previously load is complete)
     static loadData = function() {
-        if (!loadPromise) {
-            loadPromise = loadJSON('./data/scenarios.json')
+        if (!Scenarios.loadPromise) {
+            Scenarios.loadPromise = loadJSON('./data/scenarios.json')
                 .then(scenarios => {
-                    loadInProgress = false;
-                    scenarioData = scenarios;
+                    Scenarios.loadPromise = null;
+                    Scenarios.loadedData = scenarios;
+                    return Scenarios.loadedData;
                 });
         }
-        return loadPromise;
+        return Scenarios.loadPromise;
+    }
+
+    // Get existing loaded data (do not reload if already retrieved)
+    static getData = function() {
+        if (Scenarios.loadedData) {
+            return Promise.resolve(Scenarios.loadedData);
+        } else {
+            return Scenarios.loadData();
+        }
     }
 }
 
 function updateScenarios() {
-    Scenarios.loadData().then(scenarios => {
-        for (const [number, scenario] of Object.entries(scenarioData)) {
+    Scenarios.getData().then(scenarios => {
+        for (const [number, scenario] of Object.entries(scenarios)) {
             console.log(readSpoiler(scenario.name));
         }
     });
