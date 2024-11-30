@@ -7,7 +7,7 @@ class Scenarios {
     static loadedData;
     static userData;
 
-    // Codes for unlockScenario
+    // Codes for scenario locking and unlocking
     static UNLOCKED = 0;
     static LOCKED = 1;
     static NOT_FOUND = 2;
