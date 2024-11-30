@@ -9,8 +9,10 @@ class Scenarios {
 
     // Codes for unlockScenario
     static UNLOCKED = 0;
-    static NOT_FOUND = 1;
-    static ALREADY_UNLOCKED = 2;
+    static LOCKED = 1;
+    static NOT_FOUND = 2;
+    static ALREADY_UNLOCKED = 3;
+    static NOT_UNLOCKED = 4;
 
     // Load data from JSON (force reload if previously load is complete)
     static loadData = function() {
@@ -82,6 +84,32 @@ class Scenarios {
                     }
                     Scenarios.userData[number] = { status: 'revealed' };
                     return [Scenarios.UNLOCKED, null];
+                }
+            }
+            return [Scenarios.NOT_FOUND, 'Scenario "' + scenario + '" not found'];
+        }
+    }
+
+    // Locks a scenario, returning whether it succeeded and an error message if not
+    static lockScenario(scenario) {
+        if (typeof scenario === 'number' || scenario.match(/^\d+$/)) {
+            const number = parseInt(scenario);
+            if (!Scenarios.loadedData[number] || !Scenarios.loadedData[number].number === number) {
+                return [Scenarios.NOT_FOUND, 'No scenario number ' + number + ' found'];
+            }
+            if (typeof Scenarios.userData[number] === 'undefined') {
+                return [Scenarios.NOT_UNLOCKED, 'Scenario ' + number + ' not yet unlocked'];
+            }
+            delete Scenarios.userData[number];
+            return [Scenarios.LOCKED, null];
+        } else {
+            for (const [number, scenarioData] of Object.entries(Scenarios.loadedData)) {
+                if (scenario === readSpoiler(scenarioData.name)) {
+                    if (typeof Scenarios.userData[number] === 'undefined') {
+                        return [Scenarios.NOT_UNLOCKED, 'Scenario "' + scenario + '" not yet unlocked'];
+                    }
+                    delete Scenarios.userData[number];
+                    return [Scenarios.LOCKED, null];
                 }
             }
             return [Scenarios.NOT_FOUND, 'Scenario "' + scenario + '" not found'];
@@ -159,9 +187,9 @@ function updateScenarios() {
             $scenarioList.appendChild($li);
         }
 
-        if (lockedScenarios > 0) {
-            const $li = document.createElement('li');
+        const $buttonLi = document.createElement('li');
 
+        if (lockedScenarios > 0) {
             const $unlockButton = document.createElement('div');
             $unlockButton.appendChild(document.createTextNode('Unlock Scenarios'));
             makeButton($unlockButton, function(event) {
@@ -199,10 +227,40 @@ function updateScenarios() {
                     })
                     .catch(() => {});
             });
-            $li.appendChild($unlockButton);
-
-            $scenarioList.appendChild($li);
+            $buttonLi.appendChild($unlockButton);
         }
+
+        const $lockButton = document.createElement('div');
+        $lockButton.appendChild(document.createTextNode('Re-Lock Scenarios'));
+        makeButton($lockButton, function(event) {
+            event.preventDefault();
+            popPrompt('Enter one or more scenario numbers or names to re-lock')
+                .then(response => {
+                    const scenarios = response.split(/,/g).map(a => a.trim());
+                    let successes = 0;
+                    let errors = [];
+
+                    scenarios.forEach(scenario => {
+                        const [code, message] = Scenarios.lockScenario(scenario);
+                        if (code === Scenarios.LOCKED) {
+                            successes++;
+                        } else {
+                            errors.push(scenario);
+                        }
+                    });
+                    if (successes > 0) {
+                        Scenarios.updateUserData();
+                        updateScenarios();
+                    }
+                    if (errors.length > 0) {
+                        popError("Some scenarios could not be found and locked:\n" + errors.join(', '));
+                    }
+                })
+                .catch(() => {});
+        });
+        $buttonLi.appendChild($lockButton);
+
+        $scenarioList.appendChild($buttonLi);
     });
 }
 
