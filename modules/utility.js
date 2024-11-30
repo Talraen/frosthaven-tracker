@@ -13,7 +13,7 @@ const popConfirm = message =>
             resolve();
         } else {
             reject();
-        }    
+        }
     });
 
 const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1);
@@ -84,6 +84,13 @@ const readSpoilerObject = data => {
     return spoiled;
 };
 
+// Quickly clear out DOM element
+function emptyElement($element) {
+    while ($element.firstChild) {
+        $element.removeChild($element.firstChild);
+    }
+}
+
 function makeRadioButtons($buttons, clickCallback, { deselect = false } = {}) {
     [...$buttons].forEach($button => {
         // Give created radio buttons the radio-button class
@@ -116,6 +123,45 @@ function makeRadioButtons($buttons, clickCallback, { deselect = false } = {}) {
     });
 }
 
+function makeToggle($element, options, clickCallback, { current = null } = {}) {
+    $element.classList.add('toggle');
+
+    let defaultOption = options[0];
+    if (current !== null) {
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].class === current) {
+                defaultOption = options[i];
+                break;
+            }
+        }
+    }
+    assignToggleOption($element, defaultOption);
+
+    $element.addEventListener('click', function(event) {
+        event.preventDefault();
+
+        for (let i = 0; i < options.length; i++) {
+            if ($element.classList.contains(options[i].class)) {
+                $element.classList.remove(options[i].class);
+                clickCallback(assignToggleOption($element, options[(i + 1) % options.length]));
+                break;
+            }
+        }
+    });
+}
+
+// Sets an option on a toggle, returns the current class
+function assignToggleOption($element, option) {
+    emptyElement($element);
+    $element.appendChild(document.createTextNode(option.text));
+    if (option.class) {
+        $element.classList.add(option.class);
+        return option.class;
+    } else {
+        return false;
+    }
+}
+
 function copyText(text, $textarea) {
     $textarea.value = text;
     if (typeof $textarea.select === 'function') {
@@ -143,4 +189,4 @@ function readTabs(tabText, { headers = true } = {}) {
     return data;
 }
 
-export { popMessage, popError, popConfirm, capitalize, hash, hideSpoiler, readSpoiler, makeRadioButtons, loadJSON, copyText, readTabs };
+export { popMessage, popError, popConfirm, capitalize, hash, hideSpoiler, readSpoiler, emptyElement, makeRadioButtons, makeToggle, loadJSON, copyText, readTabs };

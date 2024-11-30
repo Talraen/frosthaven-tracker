@@ -1,6 +1,52 @@
 body {
     font-family: sans-serif;
 }
+ul {
+    list-style-type: none;
+    margin: 1em 0;
+    padding: 0;
+}
+/* Generic control buttons */
+.radio-button {
+    background-color: #bbb;
+    border-radius: 0.5em;
+    color: #000;
+    cursor: pointer;
+    display: inline-block;
+    margin: 0.1em 0.2em;
+    padding: 0.2em 0.4em;
+}
+.radio-button.enabled {
+    background-color: #00c;
+    color: #ddd;
+}
+.toggle {
+    background-color: #bbb;
+    border-radius: 0.5em;
+    color: #000;
+    cursor: pointer;
+    display: inline-block;
+    margin: 0.1em 0.2em;
+    padding: 0.2em 0.4em;
+}
+.toggle.complete,
+.toggle.found {
+    background-color: #090;
+    color: #ddd;
+}
+.toggle.locked {
+    background-color: #c00;
+    color: #ddd;
+}
+/* Scenarios */
+.scenario-number {
+    display: inline-block;
+    font-weight: bold;
+    margin-right: 0.5em;
+    text-align: right;
+    min-width: 2em;
+}
+/* Create JSON */
 .textarea-utility {
     width: 90vw;
     height: 25vh;
@@ -11,16 +57,4 @@ body {
 }
 #json-output-area.shown {
     display: block;
-}
-.radio-button {
-    background-color: #bbb;
-    border-radius: 0.5em;
-    color: #000;
-    cursor: pointer;
-    display: inline-block;
-    padding: 0.2em 0.4em;
-}
-.radio-button.enabled {
-    background-color: #00c;
-    color: #ddd;
 }
