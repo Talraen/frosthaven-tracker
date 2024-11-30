@@ -28,7 +28,7 @@ $processTabInput.addEventListener('click', function(event) {
             break;
 
         default:
-            popError('Unknown tab input type', tabInputType);
+            popError('Unknown tab input type: ' + tabInputType);
             output = null;
     }
 
